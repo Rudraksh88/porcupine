@@ -9,15 +9,15 @@
 </script>
 
 <!-- Bouncy Cubic Bezier -->
-<div class="background-container flex min-w-screen min-h-screen bg-neutral-100 *:transition-all *:ease-cubic-bezier(0.25, 0.1, 0.25, 1) rounded-lg">
+<div class="background-container flex min-w-screen min-h-screen bg-neutral-100 transition-all ease-cubic-bezier(0.25, 0.1, 0.25, 1) rounded-lg">
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<div class="sidebar-container p-2 select-none group/sidebar spring-transition {sidebarState ? 'flex-[.2]' : 'flex-[.028]'}"
+	<div class="sidebar-container p-2 select-none group/sidebar spring-transition transform-gpu will-change-transform {sidebarState ? 'flex-[.2]' : 'flex-[.02]'}"
 		onclick={() => {
 			sidebarState = !sidebarState;
 		}}
 	>
-		<Sidebar/>
+		<Sidebar {sidebarState}/>
 	</div>
 	<div class="content-container flex-1 p-2 pl-0">
 		<div class="h-full w-full p-3 px-5 bg-white border-2 border-neutral-300/60 rounded-md shadow-xl shadow-[#000000005]">
