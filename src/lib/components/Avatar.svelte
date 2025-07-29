@@ -5,7 +5,7 @@
   let colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'];
   let maskId = `mask_${Math.random().toString(36).substr(2, 9)}`;
   let filterId = `filter_${Math.random().toString(36).substr(2, 9)}`;
-  let initials = 'AB';
+  let initials = 'RT';
 
   // Transform parameters for randomization
   let transforms = [
@@ -59,6 +59,50 @@
   onMount(() => {
     randomizeColors();
   });
+
+  function exportSVG() {
+    const svgElement = document.querySelector('.avatar-preview');
+    const svgString = new XMLSerializer().serializeToString(svgElement);
+    const blob = new Blob([svgString], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `avatar-${initials.toLowerCase()}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportPNG() {
+    const svgElement = document.querySelector('.avatar-preview');
+    const svgString = new XMLSerializer().serializeToString(svgElement);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+
+    canvas.width = 500;
+    canvas.height = 500;
+
+    img.onload = function() {
+      ctx.drawImage(img, 0, 0, 500, 500);
+      canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `avatar-${initials.toLowerCase()}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    };
+
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(svgBlob);
+    img.src = url;
+  }
+
+  function getSVGString() {
+    const svgElement = document.querySelector('.avatar-preview');
+    return new XMLSerializer().serializeToString(svgElement);
+  }
 </script>
 
 <div class="avatar-generator">
@@ -98,24 +142,46 @@
         <!-- Initials text overlay -->
         <text
           x="40"
-          y="43"
+          y="42"
           text-anchor="middle"
           dominant-baseline="middle"
-          font-family="system-ui, -apple-system, sans-serif"
+          font-family="Inter Display"
           font-size="27"
           font-weight="400"
           fill="white"
           style="mix-blend-mode: overlay; filter: drop-shadow(2px 4px 6px black);"
         >
-          {initials.toUpperCase()}
+          {initials.slice(0, 3).toUpperCase()}
         </text>
       </g>
 
       <defs>
+        <!-- Base blur filter -->
         <filter id={filterId} filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
           <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
           <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend>
           <feGaussianBlur stdDeviation="7" result="effect1_foregroundBlur"></feGaussianBlur>
+        </filter>
+
+        <!-- Individual blur filters for each layer -->
+        {#each colors.slice(1) as _, i}
+          <filter id="blur{i}_{filterId}" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+            <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend>
+            <feGaussianBlur stdDeviation="{7 + Math.max(2 + i * 1.6, 5)}" result="effect1_foregroundBlur"></feGaussianBlur>
+          </filter>
+        {/each}
+
+        <!-- Text drop shadow filter -->
+        <filter id="textShadow_{filterId}" x="-20%" y="-20%" width="140%" height="140%">
+          <feOffset in="SourceGraphic" dx="2" dy="4" result="offset"/>
+          <feGaussianBlur in="offset" stdDeviation="3" result="blur"/>
+          <feFlood flood-color="black" flood-opacity="0.6" result="color"/>
+          <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+          <feMerge>
+            <feMergeNode in="shadow"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
         </filter>
       </defs>
     </svg>
@@ -170,6 +236,15 @@
       <button class="btn primary" on:click={randomizeEffect}>
         ✨ Randomize Effect
       </button>
+
+      <div class="export-controls">
+        <button class="btn secondary" on:click={exportSVG}>
+          📄 Export SVG
+        </button>
+        <button class="btn secondary" on:click={exportPNG}>
+          🖼️ Export PNG (500px)
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -305,6 +380,18 @@
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+  }
+
+  .export-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .export-controls .btn {
+    flex: 1;
+    min-width: 140px;
   }
 
   .btn {
