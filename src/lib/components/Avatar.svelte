@@ -5,6 +5,7 @@
   let colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'];
   let maskId = `mask_${Math.random().toString(36).substr(2, 9)}`;
   let filterId = `filter_${Math.random().toString(36).substr(2, 9)}`;
+  let initials = 'AB';
 
   // Transform parameters for randomization
   let transforms = [
@@ -93,6 +94,21 @@
             style={`${i % 3 === 1 ? "mix-blend-mode: overlay;" : i % 3 === 2 ? "mix-blend-mode: multiply;" : "mix-blend-mode: normal;"} filter: blur(${Math.max(2 + i * 1.6, 5)}px);`}
           />
         {/each}
+
+        <!-- Initials text overlay -->
+        <text
+          x="40"
+          y="43"
+          text-anchor="middle"
+          dominant-baseline="middle"
+          font-family="system-ui, -apple-system, sans-serif"
+          font-size="27"
+          font-weight="400"
+          fill="white"
+          style="mix-blend-mode: overlay; filter: drop-shadow(2px 4px 6px black);"
+        >
+          {initials.toUpperCase()}
+        </text>
       </g>
 
       <defs>
@@ -139,6 +155,18 @@
     </div>
 
     <div class="effect-controls">
+      <div class="initials-control">
+        <label for="initials-input">Initials:</label>
+        <input
+          id="initials-input"
+          type="text"
+          bind:value={initials}
+          maxlength="3"
+          placeholder="JD"
+          class="initials-input"
+        />
+      </div>
+
       <button class="btn primary" on:click={randomizeEffect}>
         ✨ Randomize Effect
       </button>
@@ -245,6 +273,38 @@
     margin-top: 1.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid #e0e0e0;
+  }
+
+  .initials-control {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .initials-control label {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+  }
+
+  .initials-input {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-align: center;
+    width: 80px;
+    background: white;
+    transition: border-color 0.2s;
+  }
+
+  .initials-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
   }
 
   .btn {
